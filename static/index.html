@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Credit Risk Assessment System | ML Project</title>
+  <meta name="description" content="An end-to-end machine learning system for assessing loan default risk with calibrated probability estimation and explainable credit decisioning.">
+
+  <!-- Google Fonts: Plus Jakarta Sans & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Ambient Glow Background Blobs -->
+  <div class="ambient-glow-1"></div>
+  <div class="ambient-glow-2"></div>
+
+  <!-- ==========================================================================
+       PAGE 1: INTRODUCTION LANDING PAGE WITH BACKGROUND FRAME ANIMATION
+       ========================================================================== -->
+  <section class="landing-hero" id="intro-hero">
+    <!-- Frame-by-Frame Background Canvas (ezgif-frame-001 to 200) -->
+    <div class="hero-canvas-wrap">
+      <canvas id="hero-bg-canvas"></canvas>
+      <div class="hero-canvas-overlay"></div>
+    </div>
+
+    <!-- Hero Content Layer -->
+    <div class="hero-content">
+      <div class="project-badge-bar">
+        <div class="live-indicator-dot"></div>
+        <span>Machine Learning Engineering Project &middot; FastAPI Live Engine</span>
+      </div>
+
+      <h1 class="project-title">
+        Credit Risk <span class="accent-text">Assessment</span> System
+      </h1>
+
+      <p class="project-summary">
+        An end-to-end machine learning system for assessing loan default risk with calibrated probability estimation and explainable credit decisioning.
+      </p>
+
+      <!-- Major Features Grid -->
+      <div class="features-grid">
+        <!-- 01. Model Architecture -->
+        <div class="feature-card">
+          <div class="feature-tag">
+            <span class="badge-num">01</span>
+            <span>Architecture</span>
+          </div>
+          <h3 class="feature-title">XGBoost Classifier</h3>
+          <p class="feature-desc">
+            Trained on credit records with median imputation, one-hot encoding, and hyperparameter tuning for class imbalance.
+          </p>
+        </div>
+
+        <!-- 02. Classification Threshold -->
+        <div class="feature-card">
+          <div class="feature-tag">
+            <span class="badge-num">02</span>
+            <span>Decision Boundary</span>
+          </div>
+          <h3 class="feature-title">Classification Threshold</h3>
+          <p class="feature-desc">
+            Optimized decision cutoff derived from Precision-Recall curve analysis to balance loan approvals and default risk.
+          </p>
+        </div>
+
+        <!-- 03. Probability Calibration -->
+        <div class="feature-card">
+          <div class="feature-tag">
+            <span class="badge-num">03</span>
+            <span>Reliability</span>
+          </div>
+          <h3 class="feature-title">Probability Calibration</h3>
+          <p class="feature-desc">
+            Calibrated via 5-fold cross-validated sigmoid scaling (<code>CalibratedClassifierCV</code>) ensuring probabilities reflect true odds.
+          </p>
+        </div>
+
+        <!-- 04. SHAP Explainability -->
+        <div class="feature-card">
+          <div class="feature-tag">
+            <span class="badge-num">04</span>
+            <span>Interpretability</span>
+          </div>
+          <h3 class="feature-title">SHAP Explainability</h3>
+          <p class="feature-desc">
+            TreeExplainer framework delivering global feature rankings and individual waterfall attribution per applicant.
+          </p>
+        </div>
+      </div>
+
+      <!-- Scroll Action Prompt -->
+      <div class="scroll-cta-wrap">
+        <a href="#classification" class="btn-start-assess">
+          <span>Start Risk Assessment</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <polyline points="19 12 12 19 5 12"></polyline>
+          </svg>
+        </a>
+
+        <a href="#classification" class="scroll-indicator">
+          <span>Scroll to Classify</span>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       PAGE 2: CLASSIFICATION PAGE (REVEALED ON SCROLL)
+       ========================================================================== -->
+  <section class="classification-section" id="classification">
+    <div class="section-header-wrap">
+      <span class="section-badge">FastAPI Calibrated Inference</span>
+      <h2 class="section-title">Credit Risk Classification Console</h2>
+      <p class="section-subtitle">
+        Enter applicant parameters or test with sample values to evaluate default risk and observe 3D card status in real time.
+      </p>
+    </div>
+
+    <div class="assessment-layout">
+      <!-- Left Column: Input Form -->
+      <div class="form-card">
+        <div class="form-top-actions">
+          <h2 class="form-header-title">Applicant Parameters</h2>
+          <button type="button" class="btn-sample-fill" id="btn-sample-values">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+            </svg>
+            Test with Sample Values
+          </button>
+        </div>
+
+        <form id="credit-risk-form">
+          <!-- 01. Applicant Demographics -->
+          <div class="form-group-title">
+            <span>01. Applicant Profile</span>
+          </div>
+
+          <div class="inputs-row">
+            <div class="input-field-wrap">
+              <label class="input-label" for="person_age">Age (Years)</label>
+              <input type="number" id="person_age" class="input-control" placeholder="e.g. 28" min="18" max="100" required>
+            </div>
+
+            <div class="input-field-wrap">
+              <label class="input-label" for="person_income">Annual Income ($)</label>
+              <input type="number" id="person_income" class="input-control" placeholder="e.g. 60000" min="1000" step="500" required>
+            </div>
+
+            <div class="input-field-wrap">
+              <label class="input-label" for="person_home_ownership">Home Ownership</label>
+              <select id="person_home_ownership" class="input-control" required>
+                <option value="" disabled selected>Select Ownership</option>
+                <option value="RENT">RENT</option>
+                <option value="OWN">OWN</option>
+                <option value="MORTGAGE">MORTGAGE</option>
+                <option value="OTHER">OTHER</option>
+              </select>
+            </div>
+
+            <div class="input-field-wrap">
+              <label class="input-label" for="person_emp_length">Employment Length (Years)</label>
+              <input type="number" id="person_emp_length" class="input-control" placeholder="e.g. 4.5" min="0" max="60" step="0.5" required>
+            </div>
+          </div>
+
+          <!-- 02. Loan Parameters -->
+          <div class="form-group-title">
+            <span>02. Loan Parameters</span>
+          </div>
+
+          <div class="inputs-row">
+            <div class="input-field-wrap">
+              <label class="input-label" for="loan_intent">Loan Intent</label>
+              <select id="loan_intent" class="input-control" required>
+                <option value="" disabled selected>Select Intent</option>
+                <option value="PERSONAL">PERSONAL</option>
+                <option value="EDUCATION">EDUCATION</option>
+                <option value="MEDICAL">MEDICAL</option>
+                <option value="VENTURE">VENTURE</option>
+                <option value="HOMEIMPROVEMENT">HOME IMPROVEMENT</option>
+                <option value="DEBTCONSOLIDATION">DEBT CONSOLIDATION</option>
+              </select>
+            </div>
+
+            <div class="input-field-wrap">
+              <label class="input-label" for="loan_grade">Loan Grade</label>
+              <select id="loan_grade" class="input-control" required>
+                <option value="" disabled selected>Select Grade</option>
+                <option value="A">Grade A (Lowest Risk)</option>
+                <option value="B">Grade B</option>
+                <option value="C">Grade C</option>
+                <option value="D">Grade D</option>
+                <option value="E">Grade E</option>
+                <option value="F">Grade F</option>
+                <option value="G">Grade G (Highest Risk)</option>
+              </select>
+            </div>
+
+            <div class="input-field-wrap">
+              <label class="input-label" for="loan_amnt">Loan Amount ($)</label>
+              <input type="number" id="loan_amnt" class="input-control" placeholder="e.g. 10000" min="500" step="250" required>
+            </div>
+
+            <div class="input-field-wrap">
+              <label class="input-label" for="loan_int_rate">Interest Rate (%)</label>
+              <input type="number" id="loan_int_rate" class="input-control" placeholder="e.g. 10.5" min="1.0" max="40.0" step="0.1" required>
+            </div>
+
+            <div class="input-field-wrap full-width">
+              <label class="input-label" for="loan_percent_income">
+                <span>Loan as % of Income</span>
+                <span class="badge-auto">Auto-synced</span>
+              </label>
+              <div class="range-wrap">
+                <input type="range" id="loan_percent_income_range" min="0.01" max="1.00" step="0.01" value="0.15">
+                <span class="range-val-badge" id="loan_percent_badge">15%</span>
+                <input type="number" id="loan_percent_income" class="input-control" style="width: 95px;" placeholder="0.15" min="0.01" max="1.00" step="0.01" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- 03. Credit Bureau Record -->
+          <div class="form-group-title">
+            <span>03. Credit Bureau Record</span>
+          </div>
+
+          <div class="inputs-row">
+            <div class="input-field-wrap">
+              <label class="input-label">Previous Historical Default?</label>
+              <div class="toggle-group">
+                <div class="toggle-option active" id="toggle-default-n">NO (N)</div>
+                <div class="toggle-option" id="toggle-default-y">YES (Y)</div>
+              </div>
+              <input type="hidden" id="cb_person_default_on_file" value="N">
+            </div>
+
+            <div class="input-field-wrap">
+              <label class="input-label" for="cb_person_cred_hist_length">Credit History Length (Years)</label>
+              <input type="number" id="cb_person_cred_hist_length" class="input-control" placeholder="e.g. 5" min="1" max="40" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit-assessment" id="btn-submit-form">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+            Run Credit Risk Assessment
+          </button>
+        </form>
+      </div>
+
+      <!-- Right Column: 3D Credit Cards & Output Panel -->
+      <div class="right-stage-wrapper">
+
+        <!-- 3D Interactive Credit Cards Stage -->
+        <div class="card-stage-container">
+          <div class="card-stack-3d" id="card-stack">
+            <!-- 3rd Card: Dark Glass -->
+            <div class="credit-card card-bottom">
+              <div class="card-header-row">
+                <div class="card-chip"></div>
+                <span class="card-status-pill">ML PROTOCOL</span>
+              </div>
+              <div class="card-number">•••• •••• •••• 9000</div>
+              <div class="card-footer-row">
+                <div class="card-holder-info">
+                  <span class="card-info-label">Card Holder</span>
+                  <span class="card-holder-name">CREDIT VAULT</span>
+                </div>
+                <div class="card-expiry-wrap">
+                  <span class="card-info-label">Version</span>
+                  <span class="card-expiry">XGB-1.0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2nd Card: Silver Frosted Glass -->
+            <div class="credit-card card-middle">
+              <div class="card-header-row">
+                <div class="card-chip"></div>
+                <span class="card-status-pill" style="color: #222; border-color: rgba(0,0,0,0.2);">CALIBRATED</span>
+              </div>
+              <div class="card-number">•••• •••• •••• 8820</div>
+              <div class="card-footer-row">
+                <div class="card-holder-info">
+                  <span class="card-info-label" style="color: #555;">Pipeline</span>
+                  <span class="card-holder-name">Scikit-Learn</span>
+                </div>
+                <div class="card-expiry-wrap">
+                  <span class="card-info-label" style="color: #555;">CV Folds</span>
+                  <span class="card-expiry">5-Fold</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 1st Card: Hero Amber Glass with Live Status -->
+            <div class="credit-card card-top" id="top-interactive-card">
+              <div class="card-header-row">
+                <div class="card-chip-wrap">
+                  <div class="card-chip"></div>
+                  <svg class="contactless-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8.5 16.5a5 5 0 0 1 0-9"/>
+                    <path d="M12 19a9 9 0 0 0 0-14"/>
+                    <path d="M15.5 21.5a13 13 0 0 0 0-19"/>
+                  </svg>
+                </div>
+                <span class="card-status-pill" id="card-status-pill">AWAITING EVALUATION</span>
+              </div>
+
+              <div class="card-number" id="card-display-number">4532 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 2026</div>
+
+              <div class="card-footer-row">
+                <div class="card-holder-info">
+                  <span class="card-info-label">Card Holder</span>
+                  <span class="card-holder-name" id="card-display-name">LOAN APPLICANT</span>
+                </div>
+                <div class="card-expiry-wrap">
+                  <span class="card-info-label">Status</span>
+                  <span class="card-expiry" id="card-expiry-status">STANDBY</span>
+                </div>
+                <div class="card-network-logo">
+                  <div class="network-circles">
+                    <div class="circle-1"></div>
+                    <div class="circle-2"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Assessment Output Card -->
+        <div class="results-card">
+
+          <!-- STATE 1: WAITING ANIMATION (Shown by default) -->
+          <div class="waiting-state" id="waiting-state">
+            <div class="waiting-radar-box">
+              <div class="radar-ring"></div>
+              <div class="radar-ring"></div>
+              <div class="radar-ring"></div>
+              <div class="radar-core"></div>
+            </div>
+            <h3 class="waiting-title">Awaiting Applicant Data</h3>
+            <p class="waiting-desc">
+              Fill in the parameters on the left or click <strong>&ldquo;Test with Sample Values&rdquo;</strong> to run inference through the calibrated model.
+            </p>
+          </div>
+
+          <!-- STATE 2: ACTIVE PREDICTION RESULTS (Shown after submit) -->
+          <div class="active-results-state" id="active-results-state">
+            <div class="results-header">
+              <h3>Model Assessment Output</h3>
+              <div class="live-indicator">
+                <div class="live-dot"></div>
+                <span>FASTAPI INFERENCE READY</span>
+              </div>
+            </div>
+
+            <!-- Gauge Dial -->
+            <div class="gauge-box">
+              <svg class="gauge-svg" viewBox="0 0 160 160">
+                <circle class="gauge-bg" cx="80" cy="80" r="70" />
+                <circle class="gauge-fill" id="gauge-fill" cx="80" cy="80" r="70" />
+              </svg>
+              <div class="gauge-content">
+                <span class="gauge-value" id="gauge-value">0.00%</span>
+                <span class="gauge-sublabel">Default Probability</span>
+              </div>
+            </div>
+
+            <!-- Decision Outcome Banner -->
+            <div class="decision-banner status-low" id="decision-banner">
+              <div class="decision-title" id="decision-title">APPROVED - LOW RISK</div>
+              <div class="decision-desc" id="decision-desc">Default probability is well below the calibrated threshold. Loan approved.</div>
+            </div>
+
+            <!-- Breakdown Metrics -->
+            <div class="metrics-list">
+              <div class="metric-row">
+                <span class="metric-name">Classification Decision</span>
+                <span class="metric-val" id="metric-risk-val">Low Risk</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-name">Calculated Default Prob</span>
+                <span class="metric-val" id="metric-prob-val">0.00%</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-name">Calibrated Decision Cutoff</span>
+                <span class="metric-val" id="metric-threshold-val">99.97%</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-name">Inference Latency</span>
+                <span class="metric-val" style="color: var(--accent-amber);">&lt; 15 ms</span>
+              </div>
+            </div>
+
+            <!-- Make Another Assessment Button -->
+            <button type="button" class="btn-reset-assessment" id="btn-make-another">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M1 4v6h6M23 20v-6h-6"/>
+                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+              </svg>
+              Make Another Assessment
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="project-footer">
+    <p>&copy; 2026 Credit Risk Assessment System &middot; Production ML Pipeline &middot; XGBoost &middot; CalibratedClassifierCV &middot; SHAP</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

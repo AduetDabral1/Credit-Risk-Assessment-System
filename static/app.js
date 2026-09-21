@@ -1,0 +1,560 @@
+/**
+ * Credit Risk Assessment System - Interactive Frontend Engine
+ * Features:
+ * 1. Ambient Background Frame Animation (Canvas looping 200 3D frames with IntersectionObserver)
+ * 2. 3D Card Mouse Tilt & Parallax Physics
+ * 3. Real-Time Form Calculations & Ratio Synchronization
+ * 4. Sample Values Populator
+ * 5. On-Demand FastAPI Prediction with Gauge Animation
+ * 6. "Make Another Assessment" Reset Workflow
+ */
+
+document.addEventListener('DOMContentLoaded', () => {
+  initHeroCanvasAnimation();
+  init3DParallax();
+  initFormSync();
+  initSampleValuesButton();
+  initPredictionEngine();
+  initResetFlow();
+});
+
+/* ==========================================================================
+   1. Landing Page Background Frame Animation (Canvas Loop)
+   ========================================================================== */
+function initHeroCanvasAnimation() {
+  const canvas = document.getElementById('hero-bg-canvas');
+  const heroSection = document.getElementById('intro-hero');
+  if (!canvas || !heroSection) return;
+
+  const ctx = canvas.getContext('2d');
+  const totalFrames = 200;
+  const frameImages = new Array(totalFrames);
+  let loadedCount = 0;
+  let currentFrame = 0;
+  let isVisible = true;
+  let animationFrameId = null;
+
+  function resizeCanvas() {
+    canvas.width = heroSection.offsetWidth || window.innerWidth;
+    canvas.height = heroSection.offsetHeight || window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function getFramePath(idx) {
+    const padded = String(idx).padStart(3, '0');
+    return `background/ezgif-frame-${padded}.jpg`;
+  }
+
+  function drawFrame(img) {
+    if (!img || !img.complete || img.naturalWidth === 0) return;
+    const cw = canvas.width;
+    const ch = canvas.height;
+    const iw = img.naturalWidth;
+    const ih = img.naturalHeight;
+
+    // Center cover logic
+    const scale = Math.max(cw / iw, ch / ih);
+    const nw = iw * scale;
+    const nh = ih * scale;
+    const ox = (cw - nw) / 2;
+    const oy = (ch - nh) / 2;
+
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.drawImage(img, ox, oy, nw, nh);
+  }
+
+  // Preload frames progressively
+  let startedLoop = false;
+  const initialBatch = 15;
+
+  function loadNext(idx) {
+    if (idx > totalFrames) return;
+    const img = new Image();
+    img.src = getFramePath(idx);
+    img.onload = () => {
+      frameImages[idx - 1] = img;
+      loadedCount++;
+      if (loadedCount >= initialBatch && !startedLoop) {
+        startedLoop = true;
+        startLoop();
+      }
+      loadNext(idx + 1);
+    };
+    img.onerror = () => {
+      loadedCount++;
+      loadNext(idx + 1);
+    };
+  }
+
+  // Start preloading initial frames in parallel
+  for (let i = 1; i <= 8; i++) {
+    loadNext(i);
+  }
+
+  let lastTime = 0;
+  const fps = 32; // ~32 fps for silky cinematic background loop
+  const interval = 1000 / fps;
+
+  function startLoop() {
+    function loop(timestamp) {
+      if (!isVisible) {
+        animationFrameId = requestAnimationFrame(loop);
+        return;
+      }
+
+      if (!lastTime) lastTime = timestamp;
+      const delta = timestamp - lastTime;
+
+      if (delta >= interval) {
+        lastTime = timestamp - (delta % interval);
+
+        const img = frameImages[currentFrame];
+        if (img) {
+          drawFrame(img);
+        }
+
+        currentFrame = (currentFrame + 1) % totalFrames;
+      }
+
+      animationFrameId = requestAnimationFrame(loop);
+    }
+    animationFrameId = requestAnimationFrame(loop);
+  }
+
+  // Pause canvas rendering when scrolled away to save GPU/CPU
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        isVisible = entry.isIntersecting;
+      });
+    }, { threshold: 0.1 });
+    observer.observe(heroSection);
+  }
+}
+
+/* ==========================================================================
+   2. 3D Card Mouse Parallax & Gyro Physics
+   ========================================================================== */
+function init3DParallax() {
+  const stage = document.querySelector('.card-stage-container');
+  const stack = document.getElementById('card-stack');
+  const topCard = document.getElementById('top-interactive-card');
+
+  if (!stage || !stack) return;
+
+  let targetRotX = 12;
+  let targetRotY = -20;
+  let currentRotX = 12;
+  let currentRotY = -20;
+
+  function handleMouseMove(e) {
+    const rect = stage.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const normX = (x / rect.width) * 2 - 1; // -1 to +1
+    const normY = (y / rect.height) * 2 - 1;
+
+    // Specular lighting follow on top card
+    if (topCard) {
+      topCard.style.setProperty('--mouse-x', `${((normX + 1) / 2) * 100}%`);
+      topCard.style.setProperty('--mouse-y', `${((normY + 1) / 2) * 100}%`);
+    }
+
+    targetRotY = -20 + normX * 16;
+    targetRotX = 12 - normY * 16;
+  }
+
+  function handleMouseLeave() {
+    targetRotX = 12;
+    targetRotY = -20;
+  }
+
+  stage.addEventListener('mousemove', handleMouseMove);
+  stage.addEventListener('mouseleave', handleMouseLeave);
+
+  // Smooth lerp rendering loop
+  function renderTilt() {
+    currentRotX += (targetRotX - currentRotX) * 0.08;
+    currentRotY += (targetRotY - currentRotY) * 0.08;
+
+    stack.style.transform = `rotateX(${currentRotX.toFixed(2)}deg) rotateY(${currentRotY.toFixed(2)}deg)`;
+    requestAnimationFrame(renderTilt);
+  }
+  requestAnimationFrame(renderTilt);
+}
+
+/* ==========================================================================
+   3. Form Synchronization & Auto-Calculations
+   ========================================================================== */
+function initFormSync() {
+  const incomeInput = document.getElementById('person_income');
+  const loanAmntInput = document.getElementById('loan_amnt');
+  const percentInput = document.getElementById('loan_percent_income');
+  const percentRange = document.getElementById('loan_percent_income_range');
+  const percentBadge = document.getElementById('loan_percent_badge');
+
+  const defaultToggleN = document.getElementById('toggle-default-n');
+  const defaultToggleY = document.getElementById('toggle-default-y');
+  const defaultHidden = document.getElementById('cb_person_default_on_file');
+
+  // Auto-sync loan percent of income
+  function syncLoanPercent() {
+    const income = parseFloat(incomeInput.value) || 0;
+    const loan = parseFloat(loanAmntInput.value) || 0;
+
+    if (income > 0 && loan > 0) {
+      let ratio = loan / income;
+      ratio = Math.min(1.0, Math.max(0.01, parseFloat(ratio.toFixed(2))));
+      percentInput.value = ratio;
+      percentRange.value = ratio;
+      if (percentBadge) percentBadge.textContent = `${(ratio * 100).toFixed(0)}%`;
+    }
+  }
+
+  incomeInput.addEventListener('input', syncLoanPercent);
+  loanAmntInput.addEventListener('input', syncLoanPercent);
+
+  // Manual range slider sync
+  percentRange.addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value);
+    percentInput.value = val;
+    if (percentBadge) percentBadge.textContent = `${(val * 100).toFixed(0)}%`;
+  });
+
+  percentInput.addEventListener('input', (e) => {
+    let val = parseFloat(e.target.value) || 0;
+    val = Math.min(1.0, Math.max(0.01, val));
+    percentRange.value = val;
+    if (percentBadge) percentBadge.textContent = `${(val * 100).toFixed(0)}%`;
+  });
+
+  // Default on File Toggle
+  defaultToggleN.addEventListener('click', () => {
+    defaultToggleN.classList.add('active');
+    defaultToggleY.classList.remove('active', 'toggle-danger');
+    defaultHidden.value = 'N';
+  });
+
+  defaultToggleY.addEventListener('click', () => {
+    defaultToggleY.classList.add('active', 'toggle-danger');
+    defaultToggleN.classList.remove('active');
+    defaultHidden.value = 'Y';
+  });
+}
+
+/* ==========================================================================
+   4. "Test with Sample Values" Button
+   ========================================================================== */
+function initSampleValuesButton() {
+  const btnSample = document.getElementById('btn-sample-values');
+  if (!btnSample) return;
+
+  const sampleProfiles = [
+    {
+      person_age: 29,
+      person_income: 68000,
+      person_home_ownership: 'MORTGAGE',
+      person_emp_length: 5.5,
+      loan_intent: 'PERSONAL',
+      loan_grade: 'A',
+      loan_amnt: 10000,
+      loan_int_rate: 7.9,
+      loan_percent_income: 0.15,
+      cb_person_default_on_file: 'N',
+      cb_person_cred_hist_length: 7,
+      applicant_name: 'ALEX VANCE'
+    },
+    {
+      person_age: 24,
+      person_income: 32000,
+      person_home_ownership: 'RENT',
+      person_emp_length: 1.5,
+      loan_intent: 'DEBTCONSOLIDATION',
+      loan_grade: 'E',
+      loan_amnt: 16000,
+      loan_int_rate: 19.5,
+      loan_percent_income: 0.50,
+      cb_person_default_on_file: 'Y',
+      cb_person_cred_hist_length: 2,
+      applicant_name: 'JORDAN REED'
+    }
+  ];
+
+  let sampleIndex = 0;
+
+  btnSample.addEventListener('click', () => {
+    const profile = sampleProfiles[sampleIndex % sampleProfiles.length];
+    sampleIndex++;
+
+    document.getElementById('person_age').value = profile.person_age;
+    document.getElementById('person_income').value = profile.person_income;
+    document.getElementById('person_home_ownership').value = profile.person_home_ownership;
+    document.getElementById('person_emp_length').value = profile.person_emp_length;
+    document.getElementById('loan_intent').value = profile.loan_intent;
+    document.getElementById('loan_grade').value = profile.loan_grade;
+    document.getElementById('loan_amnt').value = profile.loan_amnt;
+    document.getElementById('loan_int_rate').value = profile.loan_int_rate;
+
+    const percentInput = document.getElementById('loan_percent_income');
+    const percentRange = document.getElementById('loan_percent_income_range');
+    const percentBadge = document.getElementById('loan_percent_badge');
+
+    percentInput.value = profile.loan_percent_income;
+    percentRange.value = profile.loan_percent_income;
+    if (percentBadge) percentBadge.textContent = `${(profile.loan_percent_income * 100).toFixed(0)}%`;
+
+    // Default toggle
+    const toggleN = document.getElementById('toggle-default-n');
+    const toggleY = document.getElementById('toggle-default-y');
+    const defaultHidden = document.getElementById('cb_person_default_on_file');
+
+    defaultHidden.value = profile.cb_person_default_on_file;
+    if (profile.cb_person_default_on_file === 'Y') {
+      toggleY.classList.add('active', 'toggle-danger');
+      toggleN.classList.remove('active');
+    } else {
+      toggleN.classList.add('active');
+      toggleY.classList.remove('active', 'toggle-danger');
+    }
+
+    document.getElementById('cb_person_cred_hist_length').value = profile.cb_person_cred_hist_length;
+
+    // Update 3D card name
+    const cardDisplayName = document.getElementById('card-display-name');
+    if (cardDisplayName) cardDisplayName.textContent = profile.applicant_name;
+
+    // Visual pulse on submit button
+    const submitBtn = document.getElementById('btn-submit-form');
+    if (submitBtn) {
+      submitBtn.style.transform = 'scale(1.02)';
+      setTimeout(() => { submitBtn.style.transform = ''; }, 250);
+    }
+  });
+}
+
+/* ==========================================================================
+   5. Prediction Engine (Only Predicts on User Submission)
+   ========================================================================== */
+function initPredictionEngine() {
+  const form = document.getElementById('credit-risk-form');
+  const submitBtn = document.getElementById('btn-submit-form');
+  const waitingState = document.getElementById('waiting-state');
+  const activeResultsState = document.getElementById('active-results-state');
+
+  const gaugeValEl = document.getElementById('gauge-value');
+  const gaugeFillEl = document.getElementById('gauge-fill');
+  const decisionBanner = document.getElementById('decision-banner');
+  const decisionTitle = document.getElementById('decision-title');
+  const decisionDesc = document.getElementById('decision-desc');
+  const metricRisk = document.getElementById('metric-risk-val');
+  const metricProb = document.getElementById('metric-prob-val');
+  const metricThreshold = document.getElementById('metric-threshold-val');
+
+  const cardTop = document.getElementById('top-interactive-card');
+  const cardStatusPill = document.getElementById('card-status-pill');
+  const cardExpiryStatus = document.getElementById('card-expiry-status');
+
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      person_age: parseInt(document.getElementById('person_age').value, 10),
+      person_income: parseFloat(document.getElementById('person_income').value),
+      person_home_ownership: document.getElementById('person_home_ownership').value,
+      person_emp_length: parseFloat(document.getElementById('person_emp_length').value),
+      loan_intent: document.getElementById('loan_intent').value,
+      loan_grade: document.getElementById('loan_grade').value,
+      loan_amnt: parseFloat(document.getElementById('loan_amnt').value),
+      loan_int_rate: parseFloat(document.getElementById('loan_int_rate').value),
+      loan_percent_income: parseFloat(document.getElementById('loan_percent_income').value),
+      cb_person_default_on_file: document.getElementById('cb_person_default_on_file').value,
+      cb_person_cred_hist_length: parseInt(document.getElementById('cb_person_cred_hist_length').value, 10)
+    };
+
+    // UI Loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
+      <svg class="spin-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+        <path d="M12 2a10 10 0 0 1 10 10"/>
+      </svg>
+      Evaluating XGBoost Model...
+    `;
+
+    const startTime = performance.now();
+
+    try {
+      const response = await fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+      const latency = Math.round(performance.now() - startTime);
+
+      // Transition from Waiting Animation to Active Results
+      if (waitingState) waitingState.style.display = 'none';
+      if (activeResultsState) activeResultsState.style.display = 'flex';
+
+      renderPredictionResult(result, latency);
+    } catch (err) {
+      console.error('Inference error:', err);
+      if (waitingState) waitingState.style.display = 'none';
+      if (activeResultsState) activeResultsState.style.display = 'flex';
+
+      decisionTitle.textContent = 'Inference Error';
+      decisionDesc.textContent = 'Could not retrieve prediction from /predict endpoint. Verify FastAPI is running.';
+      decisionBanner.className = 'decision-banner status-high';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+        Run Credit Risk Assessment
+      `;
+    }
+  });
+
+  function renderPredictionResult(res, latencyMs) {
+    const prob = res.default_probability;
+    const isHighRisk = res.default_prediction === 1 || res.Result === 'High Risk' || prob >= 0.50;
+    const probPct = (prob * 100).toFixed(2);
+    const thresholdPct = (res.threshold * 100).toFixed(2);
+
+    // Animate counter from 0 to calculated percentage
+    let startVal = 0;
+    const animDuration = 900;
+    const animStart = performance.now();
+
+    function stepCount(time) {
+      const elapsed = time - animStart;
+      const progress = Math.min(1, elapsed / animDuration);
+      const current = (startVal + (prob * 100 - startVal) * progress).toFixed(2);
+      gaugeValEl.textContent = `${current}%`;
+
+      if (progress < 1) {
+        requestAnimationFrame(stepCount);
+      }
+    }
+    requestAnimationFrame(stepCount);
+
+    // Animate Circular Gauge
+    // Circumference r=70 is 2 * PI * 70 ≈ 440
+    const circumference = 440;
+    const offset = circumference - (prob * circumference);
+    gaugeFillEl.style.strokeDashoffset = offset;
+
+    if (isHighRisk) {
+      gaugeFillEl.style.stroke = 'var(--accent-crimson)';
+      decisionBanner.className = 'decision-banner status-high';
+      decisionTitle.textContent = 'FLAGGED - HIGH RISK';
+      decisionDesc.textContent = `Default probability (${probPct}%) exceeds calibrated cutoff threshold. Loan application flagged for review.`;
+
+      // Hero 3D card update
+      if (cardTop) {
+        cardTop.classList.remove('status-low-risk');
+        cardTop.classList.add('status-high-risk');
+      }
+      if (cardStatusPill) {
+        cardStatusPill.className = 'card-status-pill status-flagged';
+        cardStatusPill.textContent = 'HIGH RISK';
+      }
+      if (cardExpiryStatus) cardExpiryStatus.textContent = 'FLAGGED';
+
+      metricRisk.textContent = 'High Risk';
+      metricRisk.style.color = 'var(--accent-crimson)';
+    } else {
+      gaugeFillEl.style.stroke = 'var(--accent-emerald)';
+      decisionBanner.className = 'decision-banner status-low';
+      decisionTitle.textContent = 'APPROVED - LOW RISK';
+      decisionDesc.textContent = `Default probability (${probPct}%) is well below calibrated threshold (${thresholdPct}%). Loan approved.`;
+
+      // Hero 3D card update
+      if (cardTop) {
+        cardTop.classList.remove('status-high-risk');
+        cardTop.classList.add('status-low-risk');
+      }
+      if (cardStatusPill) {
+        cardStatusPill.className = 'card-status-pill status-approved';
+        cardStatusPill.textContent = 'APPROVED';
+      }
+      if (cardExpiryStatus) cardExpiryStatus.textContent = 'PASSED';
+
+      metricRisk.textContent = 'Low Risk';
+      metricRisk.style.color = 'var(--accent-emerald)';
+    }
+
+    metricProb.textContent = `${probPct}%`;
+    metricThreshold.textContent = `${thresholdPct}%`;
+  }
+}
+
+/* ==========================================================================
+   6. "Make Another Assessment" Reset Flow
+   ========================================================================== */
+function initResetFlow() {
+  const btnReset = document.getElementById('btn-make-another');
+  const form = document.getElementById('credit-risk-form');
+  const waitingState = document.getElementById('waiting-state');
+  const activeResultsState = document.getElementById('active-results-state');
+
+  const cardTop = document.getElementById('top-interactive-card');
+  const cardStatusPill = document.getElementById('card-status-pill');
+  const cardExpiryStatus = document.getElementById('card-expiry-status');
+  const cardDisplayName = document.getElementById('card-display-name');
+
+  if (!btnReset || !form) return;
+
+  btnReset.addEventListener('click', () => {
+    // Reset form inputs
+    form.reset();
+
+    // Reset default toggle
+    const toggleN = document.getElementById('toggle-default-n');
+    const toggleY = document.getElementById('toggle-default-y');
+    const defaultHidden = document.getElementById('cb_person_default_on_file');
+    if (toggleN && toggleY && defaultHidden) {
+      toggleN.classList.add('active');
+      toggleY.classList.remove('active', 'toggle-danger');
+      defaultHidden.value = 'N';
+    }
+
+    // Reset range slider badge
+    const percentRange = document.getElementById('loan_percent_income_range');
+    const percentBadge = document.getElementById('loan_percent_badge');
+    if (percentRange) percentRange.value = 0.15;
+    if (percentBadge) percentBadge.textContent = '15%';
+
+    // Reset 3D Card
+    if (cardTop) {
+      cardTop.classList.remove('status-low-risk', 'status-high-risk');
+    }
+    if (cardStatusPill) {
+      cardStatusPill.className = 'card-status-pill';
+      cardStatusPill.textContent = 'AWAITING EVALUATION';
+    }
+    if (cardExpiryStatus) cardExpiryStatus.textContent = 'STANDBY';
+    if (cardDisplayName) cardDisplayName.textContent = 'LOAN APPLICANT';
+
+    // Switch back to Waiting Animation State
+    if (activeResultsState) activeResultsState.style.display = 'none';
+    if (waitingState) waitingState.style.display = 'flex';
+
+    // Focus first input
+    const firstInput = document.getElementById('person_age');
+    if (firstInput) {
+      firstInput.focus();
+      firstInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+}

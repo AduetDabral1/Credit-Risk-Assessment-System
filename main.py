@@ -45,9 +45,9 @@ def predict(data : LoanApplication):
     prediction      = int(probability >= ml_model["threshold"])
 
     return {
-        "default_probability"       : probability,
-        "default_prediction"        : prediction,
-        "threshold"                 : ml_model["threshold"],
+        "default_probability"       : float(probability),
+        "default_prediction"        : int(prediction),
+        "threshold"                 : float(ml_model["threshold"]),
         "Result"                    : "High Risk" if prediction == 1 else "Low Risk"
     }
 
