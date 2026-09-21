@@ -1,0 +1,1064 @@
+/* ==========================================================================
+   Credit Risk Assessment System - Dedicated Report Stylesheet
+   Theme: Executive Dark Glassmorphism + High-Contrast Corporate Print Engine
+   ========================================================================== */
+
+:root {
+  --bg-primary: #070a10;
+  --bg-secondary: #0d131f;
+  --card-bg: rgba(18, 24, 38, 0.75);
+  --card-border: rgba(255, 255, 255, 0.09);
+  --card-border-hover: rgba(245, 158, 11, 0.4);
+
+  --accent-amber: #f59e0b;
+  --accent-amber-glow: rgba(245, 158, 11, 0.25);
+  --accent-emerald: #10b981;
+  --accent-emerald-glow: rgba(16, 185, 129, 0.25);
+  --accent-crimson: #ef4444;
+  --accent-crimson-glow: rgba(239, 68, 68, 0.25);
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(245, 158, 11, 0.07) 0%, transparent 40%),
+    radial-gradient(circle at 85% 75%, rgba(16, 185, 129, 0.05) 0%, transparent 45%),
+    linear-gradient(180deg, #070a10 0%, #0d131f 100%);
+  background-attachment: fixed;
+  color: var(--text-main);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  min-height: 100vh;
+  padding: 32px 20px 80px;
+}
+
+/* Container */
+.report-container {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   Toolbar & Top Bar
+   ========================================================================== */
+.report-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.btn-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--card-border);
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+
+.btn-back-link:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(-2px);
+}
+
+.report-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-action-report {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 1px solid transparent;
+}
+
+.btn-download-pdf {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #070a10;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
+
+.btn-download-pdf:hover {
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-export-json {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  border-color: var(--card-border);
+}
+
+.btn-export-json:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   Report Document Header
+   ========================================================================== */
+.report-doc-header {
+  background: var(--card-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.doc-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--accent-amber);
+  background: rgba(245, 158, 11, 0.1);
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.doc-title {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.doc-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.doc-meta-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.doc-ref-id {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+}
+
+.doc-meta-item {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Hero Decision Section (Gauge + Banner + Primary Metrics)
+   ========================================================================== */
+.report-hero-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .report-hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left Speedometer Meter Column */
+.gauge-column-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 24px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.meter-top-header {
+  margin-bottom: 6px;
+}
+
+.meter-header-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.speedometer-box {
+  position: relative;
+  width: 100%;
+  max-width: 270px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 4px 0 6px;
+}
+
+.speedometer-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.35));
+}
+
+.meter-track-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+
+.meter-gradient-arc {
+  fill: none;
+  stroke-width: 14;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.2));
+}
+
+.meter-tick {
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.meter-tick-mid {
+  stroke: #f59e0b;
+  stroke-width: 2;
+}
+
+.meter-tick-label {
+  fill: var(--text-dim);
+  font-size: 8.5px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.meter-tick-mid-label {
+  fill: #f59e0b;
+  font-weight: 700;
+}
+
+/* Needle Physics */
+.meter-needle-group {
+  transform-origin: 120px 120px;
+  transform: rotate(-90deg);
+  transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.meter-needle-blade {
+  fill: #ffffff;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.6));
+}
+
+.meter-needle-tip {
+  fill: #10b981;
+  transition: fill 0.4s ease, filter 0.4s ease;
+}
+
+.meter-hub-outer {
+  fill: #141d2b;
+  stroke: rgba(255, 255, 255, 0.3);
+  stroke-width: 2;
+}
+
+.meter-hub-inner {
+  fill: #10b981;
+  transition: fill 0.4s ease;
+}
+
+/* Digital Readout below Needle */
+.meter-score-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -8px;
+  margin-bottom: 12px;
+}
+
+.meter-prob-val {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.meter-prob-sublabel {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+}
+
+/* Zones Legend Chips (Green, Yellow, Red) */
+.meter-zones-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  width: 100%;
+}
+
+.zone-legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: var(--text-muted);
+}
+
+.zone-chip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.chip-green .zone-chip-dot {
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.8);
+}
+
+.chip-yellow .zone-chip-dot {
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.8);
+}
+
+.chip-red .zone-chip-dot {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
+}
+
+/* Dynamic Tier Pill */
+.gauge-tier-pill {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  letter-spacing: 0.05em;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.tier-low {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.tier-mid {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.tier-high {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+/* Right Underwriting Decision Column */
+.decision-column-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 28px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.decision-hero-banner {
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+  border: 1px solid transparent;
+}
+
+.decision-hero-banner.status-low {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.04) 100%);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.decision-hero-banner.status-high {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(239, 68, 68, 0.04) 100%);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.decision-hero-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.decision-hero-banner.status-low .decision-hero-icon {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.decision-hero-banner.status-high .decision-hero-icon {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.decision-title-text {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+
+.decision-hero-banner.status-low .decision-title-text {
+  color: #34d399;
+}
+
+.decision-hero-banner.status-high .decision-title-text {
+  color: #f87171;
+}
+
+.decision-desc-text {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* Key Metrics 4-Block Grid */
+.report-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.report-metric-tile {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 16px 14px;
+}
+
+.metric-tile-label {
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.metric-tile-val {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* ==========================================================================
+   Two-Column Detail Layout: Applicant Profile Matrix & 3D Card / Recourse
+   ========================================================================== */
+.report-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .report-detail-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.report-card-panel {
+  background: var(--card-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 26px 28px;
+}
+
+.panel-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.panel-title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-title svg {
+  color: var(--accent-amber);
+}
+
+/* Applicant Profile Matrix Grid */
+.attr-matrix-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 550px) {
+  .attr-matrix-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.attr-item {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.attr-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 3px;
+}
+
+.attr-value {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+/* 3D Visual Card Token Showcase */
+.card-token-showcase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.token-credit-card {
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1.586;
+  border-radius: 18px;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.token-credit-card:hover {
+  transform: translateY(-4px) rotateX(4deg);
+}
+
+.token-card-low {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #022c22 100%);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.token-card-high {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #450a0a 100%);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.token-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.token-chip {
+  width: 40px;
+  height: 30px;
+  background: linear-gradient(135deg, #fcd34d 0%, #b45309 100%);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25);
+}
+
+.token-number {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  letter-spacing: 0.15em;
+  color: #ffffff;
+  margin: 10px 0;
+}
+
+.token-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.token-holder-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+}
+
+.token-risk-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Adverse Action & Recourse Sections
+   ========================================================================== */
+.report-adverse-card {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+}
+
+.adverse-title-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #f87171;
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: 12px;
+}
+
+.adverse-item-row {
+  background: rgba(18, 24, 38, 0.8);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.adverse-code-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.adverse-code-num {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.report-recourse-card {
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+}
+
+.recourse-title-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fbbf24;
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: 12px;
+}
+
+.recourse-body-text {
+  font-size: 0.95rem;
+  color: var(--text-main);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.btn-apply-recourse-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #070a10;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-apply-recourse-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+}
+
+/* ==========================================================================
+   Model Governance & Underwriting Certification
+   ========================================================================== */
+.governance-audit-panel {
+  background: var(--card-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 26px 28px;
+  margin-bottom: 24px;
+}
+
+.gov-badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.gov-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--card-border);
+  color: var(--text-muted);
+}
+
+.gov-badge strong {
+  color: var(--text-main);
+}
+
+.audit-signoff-block {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--card-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.signature-line-box {
+  width: 260px;
+}
+
+.signature-blank-line {
+  height: 1px;
+  background: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.signature-label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.report-footer {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  margin-top: 40px;
+}
+
+/* ==========================================================================
+   PRINT-OPTIMIZED STYLESHEET (@media print)
+   Converts dark mode into crisp corporate executive credit memo for 8.5x11
+   ========================================================================== */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    padding: 0 !important;
+    font-size: 11pt !important;
+  }
+
+  /* Hide interactive non-printable elements */
+  .no-print,
+  .report-top-bar,
+  .btn-back-link,
+  .report-action-buttons,
+  .btn-apply-recourse-cta {
+    display: none !important;
+  }
+
+  .report-container {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Corporate Header */
+  .report-doc-header {
+    background: #f8fafc !important;
+    border: 2px solid #0f172a !important;
+    border-radius: 0 !important;
+    padding: 16px 20px !important;
+    margin-bottom: 16px !important;
+    page-break-inside: avoid;
+  }
+
+  .doc-title {
+    color: #0f172a !important;
+    font-size: 18pt !important;
+  }
+
+  .doc-brand-badge {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  .doc-ref-id {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border: 1px solid #94a3b8 !important;
+  }
+
+  .doc-subtitle,
+  .doc-meta-item {
+    color: #475569 !important;
+  }
+
+  /* Grid containers */
+  .report-hero-grid,
+  .report-detail-layout {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+    page-break-inside: avoid;
+  }
+
+  .gauge-column-card,
+  .decision-column-card,
+  .report-card-panel,
+  .governance-audit-panel {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    padding: 16px !important;
+    page-break-inside: avoid;
+  }
+
+  .panel-title {
+    color: #0f172a !important;
+    font-size: 12pt !important;
+  }
+
+  .attr-item {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+
+  .attr-label,
+  .metric-tile-label {
+    color: #64748b !important;
+  }
+
+  .attr-value,
+  .metric-tile-val,
+  .gauge-prob-percent {
+    color: #0f172a !important;
+  }
+
+  /* Decision banner in print */
+  .decision-hero-banner.status-low {
+    background: #ecfdf5 !important;
+    border: 2px solid #10b981 !important;
+  }
+
+  .decision-hero-banner.status-low .decision-title-text {
+    color: #047857 !important;
+  }
+
+  .decision-hero-banner.status-high {
+    background: #fef2f2 !important;
+    border: 2px solid #ef4444 !important;
+  }
+
+  .decision-hero-banner.status-high .decision-title-text {
+    color: #b91c1c !important;
+  }
+
+  .decision-desc-text {
+    color: #334155 !important;
+  }
+
+  /* Adverse Action box in print */
+  .report-adverse-card {
+    background: #fff1f2 !important;
+    border: 1.5px solid #f43f5e !important;
+    page-break-inside: avoid;
+  }
+
+  .adverse-title-bar {
+    color: #9f1239 !important;
+  }
+
+  .adverse-item-row {
+    background: #ffffff !important;
+    border: 1px solid #fda4af !important;
+    color: #0f172a !important;
+  }
+
+  .adverse-code-label {
+    color: #0f172a !important;
+  }
+
+  .adverse-code-num {
+    background: #ffe4e6 !important;
+    color: #9f1239 !important;
+  }
+
+  /* Recourse box in print */
+  .report-recourse-card {
+    background: #fffbeb !important;
+    border: 1.5px solid #f59e0b !important;
+    page-break-inside: avoid;
+  }
+
+  .recourse-title-bar {
+    color: #92400e !important;
+  }
+
+  .recourse-body-text {
+    color: #1e293b !important;
+  }
+
+  /* Signature & Sign-off */
+  .signature-blank-line {
+    background: #0f172a !important;
+  }
+
+  .signature-label {
+    color: #475569 !important;
+  }
+
+  .gov-badge {
+    background: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #334155 !important;
+  }
+
+  .gov-badge strong {
+    color: #0f172a !important;
+  }
+
+  /* Card Token */
+  .token-credit-card {
+    border: 1px solid #94a3b8 !important;
+    box-shadow: none !important;
+  }
+}

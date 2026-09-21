@@ -132,13 +132,24 @@
       <div class="form-card">
         <div class="form-top-actions">
           <h2 class="form-header-title">Applicant Parameters</h2>
-          <button type="button" class="btn-sample-fill" id="btn-sample-values">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-            </svg>
-            Test with Sample Values
-          </button>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <a href="report.html" class="btn-view-report-pill" id="btn-view-existing-report" style="display: none;">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              View Report
+            </a>
+            <button type="button" class="btn-sample-fill" id="btn-sample-values">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+              </svg>
+              Test with Sample Values
+            </button>
+          </div>
         </div>
+
+        <div id="recourse-banner-notification" style="display: none;"></div>
 
         <form id="credit-risk-form">
           <!-- 01. Applicant Demographics -->
@@ -255,7 +266,7 @@
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
             </svg>
-            Run Credit Risk Assessment
+            Run Assessment &amp; Generate Report
           </button>
         </form>
       </div>
@@ -441,8 +452,19 @@
               </div>
             </div>
 
+            <!-- View Full Dedicated Report Button -->
+            <a href="report.html" class="btn-view-full-report" id="btn-open-full-report">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+              View Dedicated Report &amp; Download PDF &rarr;
+            </a>
+
             <!-- Make Another Assessment Button -->
-            <button type="button" class="btn-reset-assessment" id="btn-make-another">
+            <button type="button" class="btn-reset-assessment" id="btn-make-another" style="margin-top: 10px;">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
                 <path d="M1 4v6h6M23 20v-6h-6"/>
                 <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>

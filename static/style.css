@@ -1363,3 +1363,70 @@ select.input-control option {
   font-size: 0.72rem;
 }
 
+/* Dedicated Report Buttons & Recourse Alert */
+.btn-view-full-report {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.25) 100%);
+  border: 1px solid var(--accent-amber);
+  color: #fbbf24;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  margin-top: 14px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15);
+}
+
+.btn-view-full-report:hover {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #070a10;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+}
+
+.btn-view-report-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: var(--accent-amber);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-view-report-pill:hover {
+  background: rgba(245, 158, 11, 0.22);
+  border-color: var(--accent-amber);
+  transform: translateY(-1px);
+}
+
+.recourse-applied-alert {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: #34d399;
+}
+
+.recourse-applied-alert strong {
+  color: #ffffff;
+}
+
+

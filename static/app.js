@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initPredictionEngine();
   initResetFlow();
   initAuditModals();
+  initSessionReportCheck();
 });
 
 /* ==========================================================================
@@ -383,7 +384,7 @@ function initPredictionEngine() {
         <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
         <path d="M12 2a10 10 0 0 1 10 10"/>
       </svg>
-      Evaluating XGBoost Model...
+      Evaluating Model &amp; Generating Report...
     `;
 
     const startTime = performance.now();
@@ -402,11 +403,48 @@ function initPredictionEngine() {
       const result = await response.json();
       const latency = Math.round(performance.now() - startTime);
 
+      let recourseData = null;
+      const isHighRisk = result.default_prediction === 1 || result.Result === 'High Risk' || (result.default_probability || 0) >= 0.50;
+
+      if (isHighRisk) {
+        try {
+          const recRes = await fetch('/recourse', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (recRes.ok) {
+            recourseData = await recRes.json();
+          }
+        } catch (recErr) {
+          console.warn('Recourse fetch error:', recErr);
+        }
+      }
+
+      // Save complete assessment bundle to sessionStorage
+      const assessmentBundle = {
+        refId: `CR-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC',
+        latencyMs: latency,
+        payload: payload,
+        prediction: result,
+        recourse: recourseData
+      };
+      sessionStorage.setItem('credit_risk_assessment', JSON.stringify(assessmentBundle));
+
+      const existingReportBtn = document.getElementById('btn-view-existing-report');
+      if (existingReportBtn) existingReportBtn.style.display = 'inline-flex';
+
       // Transition from Waiting Animation to Active Results
       if (waitingState) waitingState.style.display = 'none';
       if (activeResultsState) activeResultsState.style.display = 'flex';
 
       renderPredictionResult(result, latency, payload);
+
+      // Smoothly navigate to dedicated report page
+      setTimeout(() => {
+        window.location.href = 'report.html';
+      }, 650);
     } catch (err) {
       console.error('Inference error:', err);
       if (waitingState) waitingState.style.display = 'none';
@@ -421,7 +459,7 @@ function initPredictionEngine() {
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
           <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
         </svg>
-        Run Credit Risk Assessment
+        Run Assessment &amp; Generate Report
       `;
     }
   });
@@ -780,4 +818,57 @@ function initAuditModals() {
     });
   }
 }
+
+/* ==========================================================================
+   8. Session Report & Recourse Auto-Fill Check
+   ========================================================================== */
+function initSessionReportCheck() {
+  // 1. Show 'View Report' pill if assessment exists in session
+  const existingReportBtn = document.getElementById('btn-view-existing-report');
+  const sessionAssessment = sessionStorage.getItem('credit_risk_assessment');
+  if (existingReportBtn && sessionAssessment) {
+    existingReportBtn.style.display = 'inline-flex';
+  }
+
+  // 2. Check if applicant returned from Report page with applied recourse
+  const appliedRecourseRaw = sessionStorage.getItem('credit_risk_applied_recourse');
+  if (appliedRecourseRaw) {
+    try {
+      const rec = JSON.parse(appliedRecourseRaw);
+      sessionStorage.removeItem('credit_risk_applied_recourse');
+
+      if (rec.loan_amnt) {
+        const loanAmntEl = document.getElementById('loan_amnt');
+        if (loanAmntEl) {
+          loanAmntEl.value = rec.loan_amnt;
+          loanAmntEl.style.borderColor = 'var(--accent-emerald)';
+        }
+      }
+      if (rec.loan_percent_income) {
+        const dtiEl = document.getElementById('loan_percent_income');
+        const rangeEl = document.getElementById('loan_percent_income_range');
+        const badgeEl = document.getElementById('loan_percent_badge');
+        if (dtiEl) dtiEl.value = rec.loan_percent_income;
+        if (rangeEl) rangeEl.value = rec.loan_percent_income;
+        if (badgeEl) badgeEl.textContent = `${Math.round(rec.loan_percent_income * 100)}%`;
+      }
+
+      const notifBanner = document.getElementById('recourse-banner-notification');
+      if (notifBanner) {
+        notifBanner.className = 'recourse-applied-alert';
+        notifBanner.style.display = 'flex';
+        notifBanner.innerHTML = `
+          <span><strong>Actionable Recourse Applied:</strong> Loan amount adjusted to $${Number(rec.loan_amnt || 0).toLocaleString()} (${Math.round(Number(rec.loan_percent_income || 0) * 100)}% of income). Click &ldquo;Run Assessment &amp; Generate Report&rdquo; to verify approval!</span>
+          <button type="button" onclick="this.parentElement.style.display='none'" style="background:none; border:none; color:inherit; font-size:1.2rem; cursor:pointer; padding-left:12px;">&times;</button>
+        `;
+        setTimeout(() => {
+          notifBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 200);
+      }
+    } catch (e) {
+      console.warn('Error applying recourse from session:', e);
+    }
+  }
+}
+
 
