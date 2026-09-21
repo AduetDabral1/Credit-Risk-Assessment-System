@@ -1,0 +1,68 @@
+{
+  "timestamp": "2026-09-21T21:34:41.601225",
+  "baseline_records": 130324,
+  "production_records": 26065,
+  "thresholds": {
+    "stable": "< 0.10",
+    "moderate_shift": "0.10 - 0.25",
+    "severe_drift": ">= 0.25"
+  },
+  "features": {
+    "person_age": {
+      "type": "numeric",
+      "psi": 0.0003,
+      "status": "STABLE"
+    },
+    "person_income": {
+      "type": "numeric",
+      "psi": 0.0003,
+      "status": "STABLE"
+    },
+    "person_emp_length": {
+      "type": "numeric",
+      "psi": 0.0003,
+      "status": "STABLE"
+    },
+    "loan_amnt": {
+      "type": "numeric",
+      "psi": 0.0002,
+      "status": "STABLE"
+    },
+    "loan_int_rate": {
+      "type": "numeric",
+      "psi": 0.0002,
+      "status": "STABLE"
+    },
+    "loan_percent_income": {
+      "type": "numeric",
+      "psi": 0.0001,
+      "status": "STABLE"
+    },
+    "cb_person_cred_hist_length": {
+      "type": "numeric",
+      "psi": 0.0003,
+      "status": "STABLE"
+    },
+    "person_home_ownership": {
+      "type": "categorical",
+      "psi": 0.0001,
+      "status": "STABLE"
+    },
+    "loan_intent": {
+      "type": "categorical",
+      "psi": 0.0003,
+      "status": "STABLE"
+    },
+    "loan_grade": {
+      "type": "categorical",
+      "psi": 0.0001,
+      "status": "STABLE"
+    },
+    "cb_person_default_on_file": {
+      "type": "categorical",
+      "psi": 0.0,
+      "status": "STABLE"
+    }
+  },
+  "overall_status": "STABLE"
+}

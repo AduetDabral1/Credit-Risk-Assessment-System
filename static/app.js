@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSampleValuesButton();
   initPredictionEngine();
   initResetFlow();
+  initAuditModals();
 });
 
 /* ==========================================================================
@@ -405,7 +406,7 @@ function initPredictionEngine() {
       if (waitingState) waitingState.style.display = 'none';
       if (activeResultsState) activeResultsState.style.display = 'flex';
 
-      renderPredictionResult(result, latency);
+      renderPredictionResult(result, latency, payload);
     } catch (err) {
       console.error('Inference error:', err);
       if (waitingState) waitingState.style.display = 'none';
@@ -425,11 +426,17 @@ function initPredictionEngine() {
     }
   });
 
-  function renderPredictionResult(res, latencyMs) {
+  function renderPredictionResult(res, latencyMs, payload) {
     const prob = res.default_probability;
     const isHighRisk = res.default_prediction === 1 || res.Result === 'High Risk' || prob >= 0.50;
     const probPct = (prob * 100).toFixed(2);
     const thresholdPct = (res.threshold * 100).toFixed(2);
+
+    const adverseContainer = document.getElementById('adverse-action-container');
+    const adverseList = document.getElementById('adverse-reasons-list');
+    const recourseContainer = document.getElementById('recourse-container');
+    const recourseText = document.getElementById('recourse-text');
+    const btnApplyRecourse = document.getElementById('btn-apply-recourse');
 
     // Animate counter from 0 to calculated percentage
     let startVal = 0;
@@ -473,6 +480,58 @@ function initPredictionEngine() {
 
       metricRisk.textContent = 'High Risk';
       metricRisk.style.color = 'var(--accent-crimson)';
+
+      // 1. Render SHAP Adverse Action Reason Codes
+      if (adverseContainer && adverseList) {
+        adverseContainer.style.display = 'flex';
+        const reasons = res.adverse_action_reasons || [];
+        adverseList.innerHTML = reasons.map((r, i) => `
+          <div class="adverse-reason-item">
+            <span class="adverse-num">0${i + 1}</span>
+            <span>${r}</span>
+          </div>
+        `).join('');
+      }
+
+      // 2. Query What-If Recourse Simulator
+      if (recourseContainer && recourseText && payload) {
+        recourseContainer.style.display = 'flex';
+        recourseText.innerHTML = '<em>Calculating algorithmic recourse...</em>';
+        if (btnApplyRecourse) btnApplyRecourse.style.display = 'none';
+
+        fetch('/recourse', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(data => {
+          recourseText.textContent = data.recommendation;
+          if (data.recourse_available && data.recommended_amount) {
+            if (btnApplyRecourse) {
+              btnApplyRecourse.style.display = 'inline-flex';
+              btnApplyRecourse.onclick = () => {
+                const loanInput = document.getElementById('loan_amnt');
+                const percentInput = document.getElementById('loan_percent_income');
+                const percentRange = document.getElementById('loan_percent_income_range');
+                const percentBadge = document.getElementById('loan_percent_badge');
+
+                loanInput.value = data.recommended_amount;
+                percentInput.value = data.new_loan_percent_income;
+                if (percentRange) percentRange.value = data.new_loan_percent_income;
+                if (percentBadge) percentBadge.textContent = `${(data.new_loan_percent_income * 100).toFixed(0)}%`;
+
+                form.dispatchEvent(new Event('submit', { cancelable: true }));
+              };
+            }
+          }
+        })
+        .catch(err => {
+          console.error('Recourse error:', err);
+          recourseText.textContent = 'Could not evaluate recourse recommendation.';
+        });
+      }
+
     } else {
       gaugeFillEl.style.stroke = 'var(--accent-emerald)';
       decisionBanner.className = 'decision-banner status-low';
@@ -492,6 +551,9 @@ function initPredictionEngine() {
 
       metricRisk.textContent = 'Low Risk';
       metricRisk.style.color = 'var(--accent-emerald)';
+
+      if (adverseContainer) adverseContainer.style.display = 'none';
+      if (recourseContainer) recourseContainer.style.display = 'none';
     }
 
     metricProb.textContent = `${probPct}%`;
@@ -507,6 +569,9 @@ function initResetFlow() {
   const form = document.getElementById('credit-risk-form');
   const waitingState = document.getElementById('waiting-state');
   const activeResultsState = document.getElementById('active-results-state');
+
+  const adverseContainer = document.getElementById('adverse-action-container');
+  const recourseContainer = document.getElementById('recourse-container');
 
   const cardTop = document.getElementById('top-interactive-card');
   const cardStatusPill = document.getElementById('card-status-pill');
@@ -546,6 +611,10 @@ function initResetFlow() {
     if (cardExpiryStatus) cardExpiryStatus.textContent = 'STANDBY';
     if (cardDisplayName) cardDisplayName.textContent = 'LOAN APPLICANT';
 
+    // Hide adverse & recourse boxes
+    if (adverseContainer) adverseContainer.style.display = 'none';
+    if (recourseContainer) recourseContainer.style.display = 'none';
+
     // Switch back to Waiting Animation State
     if (activeResultsState) activeResultsState.style.display = 'none';
     if (waitingState) waitingState.style.display = 'flex';
@@ -558,3 +627,157 @@ function initResetFlow() {
     }
   });
 }
+
+/* ==========================================================================
+   7. Governance & Drift Monitoring Modals (PSI & Fairness Audit)
+   ========================================================================== */
+function initAuditModals() {
+  const btnPsi = document.getElementById('btn-view-psi');
+  const btnFairness = document.getElementById('btn-view-fairness');
+  const backdrop = document.getElementById('audit-modal-backdrop');
+  const btnClose = document.getElementById('btn-close-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalBody = document.getElementById('modal-body');
+
+  if (!backdrop) return;
+
+  function closeModal() {
+    backdrop.classList.remove('open');
+  }
+
+  if (btnClose) btnClose.addEventListener('click', closeModal);
+  backdrop.addEventListener('click', (e) => {
+    if (e.target === backdrop) closeModal();
+  });
+
+  // 1. PSI Modal
+  if (btnPsi) {
+    btnPsi.addEventListener('click', async () => {
+      modalTitle.textContent = 'Population Stability Index (PSI) Drift Report';
+      modalBody.innerHTML = '<p style="color: var(--text-muted);">Evaluating PSI feature drift against training baseline...</p>';
+      backdrop.classList.add('open');
+
+      try {
+        const res = await fetch('/metrics/psi');
+        const data = await res.json();
+        const features = data.features || {};
+
+        let rowsHtml = '';
+        for (const [feat, info] of Object.entries(features)) {
+          const isStable = info.status === 'STABLE';
+          const badgeClass = isStable ? 'audit-pill-pass' : 'audit-pill-warn';
+          rowsHtml += `
+            <tr>
+              <td><strong>${feat}</strong></td>
+              <td>${info.type}</td>
+              <td style="font-family: var(--font-mono);">${info.psi.toFixed(4)}</td>
+              <td><span class="${badgeClass}">${info.status}</span></td>
+            </tr>
+          `;
+        }
+
+        modalBody.innerHTML = `
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+            Benchmarking current inference requests against baseline training population (${data.baseline_records.toLocaleString()} records).
+            Thresholds: <em>&lt; 0.10 Stable</em>, <em>0.10 - 0.25 Moderate Shift</em>, <em>&ge; 0.25 Severe Drift</em>.
+          </p>
+          <div style="overflow-x: auto;">
+            <table class="audit-table">
+              <thead>
+                <tr>
+                  <th>Feature Name</th>
+                  <th>Type</th>
+                  <th>PSI Score</th>
+                  <th>Stability Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } catch (err) {
+        modalBody.innerHTML = '<p style="color: #f87171;">Error loading PSI metrics.</p>';
+      }
+    });
+  }
+
+  // 2. Fairness & Disparate Impact Modal
+  if (btnFairness) {
+    btnFairness.addEventListener('click', async () => {
+      modalTitle.textContent = 'Algorithmic Fairness & Disparate Impact Audit';
+      modalBody.innerHTML = '<p style="color: var(--text-muted);">Loading ECOA Four-Fifths compliance audit report...</p>';
+      backdrop.classList.add('open');
+
+      try {
+        const res = await fetch('/metrics/fairness');
+        const data = await res.json();
+        const ageCohort = data.age_cohort_audit || {};
+        const housingCohort = data.housing_cohort_audit || {};
+
+        function renderRows(cohortMap) {
+          return Object.entries(cohortMap).map(([name, info]) => {
+            const isPass = info.passes_four_fifths_rule;
+            const badgeClass = isPass ? 'audit-pill-pass' : 'audit-pill-warn';
+            const statusText = isPass ? 'PASS (80% Rule)' : 'POTENTIAL DISPARATE IMPACT';
+            return `
+              <tr>
+                <td><strong>${name}</strong></td>
+                <td>${info.applicants.toLocaleString()}</td>
+                <td style="font-family: var(--font-mono);">${info.approval_rate_pct}</td>
+                <td style="font-family: var(--font-mono);">${info.disparate_impact_ratio.toFixed(2)}</td>
+                <td><span class="${badgeClass}">${statusText}</span></td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+        modalBody.innerHTML = `
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+            Auditing model approvals under the <strong>Four-Fifths (80%) Rule</strong> (Disparate Impact Ratio &ge; 0.80).
+            Audited records: ${data.total_audited_records.toLocaleString()}.
+          </p>
+          <h4 style="color: var(--accent-amber); font-size: 0.9rem; margin: 10px 0 6px;">Age Cohort Audit (ECOA Age Safeguard)</h4>
+          <div style="overflow-x: auto; margin-bottom: 16px;">
+            <table class="audit-table">
+              <thead>
+                <tr>
+                  <th>Age Cohort</th>
+                  <th>Sample Size</th>
+                  <th>Approval Rate</th>
+                  <th>DIR Ratio</th>
+                  <th>Compliance</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${renderRows(ageCohort)}
+              </tbody>
+            </table>
+          </div>
+
+          <h4 style="color: var(--accent-amber); font-size: 0.9rem; margin: 10px 0 6px;">Housing Status Audit</h4>
+          <div style="overflow-x: auto;">
+            <table class="audit-table">
+              <thead>
+                <tr>
+                  <th>Housing Cohort</th>
+                  <th>Sample Size</th>
+                  <th>Approval Rate</th>
+                  <th>DIR Ratio</th>
+                  <th>Compliance</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${renderRows(housingCohort)}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } catch (err) {
+        modalBody.innerHTML = '<p style="color: #f87171;">Error loading fairness audit metrics.</p>';
+      }
+    });
+  }
+}
+

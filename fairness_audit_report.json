@@ -1,0 +1,51 @@
+{
+  "audit_timestamp": "2026-09-21T21:25:05.022944",
+  "total_audited_records": 25000,
+  "calibrated_threshold": 0.9996610879898071,
+  "overall_approval_rate": "78.74%",
+  "age_cohort_audit": {
+    "Young (18-25)": {
+      "applicants": 11822,
+      "approval_rate": 0.7714,
+      "approval_rate_pct": "77.14%",
+      "disparate_impact_ratio": 0.9622,
+      "passes_four_fifths_rule": true,
+      "is_reference_group": false
+    },
+    "Prime (26-55)": {
+      "applicants": 13061,
+      "approval_rate": 0.8017,
+      "approval_rate_pct": "80.17%",
+      "disparate_impact_ratio": 1.0,
+      "passes_four_fifths_rule": true,
+      "is_reference_group": true
+    },
+    "Mature/Senior (56+)": {
+      "applicants": 109,
+      "approval_rate": 0.7982,
+      "approval_rate_pct": "79.82%",
+      "disparate_impact_ratio": 0.9956,
+      "passes_four_fifths_rule": true,
+      "is_reference_group": false
+    }
+  },
+  "housing_cohort_audit": {
+    "Homeowner (Own/Mortgage)": {
+      "applicants": 12417,
+      "approval_rate": 0.8891,
+      "approval_rate_pct": "88.91%",
+      "disparate_impact_ratio": 1.0,
+      "passes_four_fifths_rule": true,
+      "is_reference_group": true
+    },
+    "Renter/Other": {
+      "applicants": 12583,
+      "approval_rate": 0.687,
+      "approval_rate_pct": "68.70%",
+      "disparate_impact_ratio": 0.7727,
+      "passes_four_fifths_rule": false,
+      "is_reference_group": false
+    }
+  },
+  "summary": "Warning: One or more cohorts have Disparate Impact Ratio < 0.80."
+}

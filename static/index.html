@@ -385,6 +385,42 @@
               <div class="decision-desc" id="decision-desc">Default probability is well below the calibrated threshold. Loan approved.</div>
             </div>
 
+            <!-- ADVERSE ACTION NOTICE (SHAP-Driven, Shown on High Risk) -->
+            <div class="adverse-action-box" id="adverse-action-container" style="display: none;">
+              <div class="adverse-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>Regulatory Adverse Action Notice (ECOA/FCRA)</span>
+              </div>
+              <p style="font-size: 0.76rem; color: var(--text-muted);">
+                Primary risk drivers extracted from calibrated SHAP feature attributions:
+              </p>
+              <div class="adverse-reasons-list" id="adverse-reasons-list">
+                <!-- Dynamically injected -->
+              </div>
+            </div>
+
+            <!-- WHAT-IF RECOURSE SIMULATOR (Shown on High Risk) -->
+            <div class="recourse-box" id="recourse-container" style="display: none;">
+              <div class="recourse-header">
+                <div class="recourse-title">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                  </svg>
+                  <span>What-If Recourse Simulator</span>
+                </div>
+              </div>
+              <p class="recourse-rec-text" id="recourse-text">
+                Calculating actionable recourse...
+              </p>
+              <button type="button" class="btn-apply-recourse" id="btn-apply-recourse">
+                <span>Apply Recourse to Application &rarr;</span>
+              </button>
+            </div>
+
             <!-- Breakdown Metrics -->
             <div class="metrics-list">
               <div class="metric-row">
@@ -419,7 +455,39 @@
 
       </div>
     </div>
+
+    <!-- Governance & Drift Monitoring Buttons -->
+    <div class="audit-bar-row">
+      <button type="button" class="btn-audit-trigger" id="btn-view-psi">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        Population Stability Index (PSI) Drift Monitor
+      </button>
+
+      <button type="button" class="btn-audit-trigger" id="btn-view-fairness">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 3v18M3 9l9-6 9 6M6 12l-3 7h6l-3-7zM18 12l-3 7h6l-3-7z"></path>
+        </svg>
+        Fairness & Disparate Impact Audit (80% Rule)
+      </button>
+    </div>
   </section>
+
+  <!-- Governance Audit Modal Popup -->
+  <div class="audit-modal-backdrop" id="audit-modal-backdrop">
+    <div class="audit-modal">
+      <div class="audit-modal-header">
+        <h3 id="modal-title">Model Governance Audit</h3>
+        <button type="button" class="btn-close-modal" id="btn-close-modal">&times;</button>
+      </div>
+      <div id="modal-body">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
 
   <footer class="project-footer">
     <p>&copy; 2026 Credit Risk Assessment System &middot; Production ML Pipeline &middot; XGBoost &middot; CalibratedClassifierCV &middot; SHAP</p>
