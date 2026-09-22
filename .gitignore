@@ -90,3 +90,9 @@ models/
 # Large Datasets / Generated Data (uncomment if you want to exclude data from git tracking)
 # data/*.csv
 # !data/credit_risk_dataset.csv
+
+# Machine Learning Models & Serialized Artifacts
+*.pkl
+!credit_risk_model.pkl
+!best_threshold.pkl
+
