@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # 1. Local FastAPI Instance Scrape Job
+  - job_name: 'credit-risk-api-local'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['host.docker.internal:8000']
+        labels:
+          environment: 'local'
+
+  # 2. Remote Production Instance on Render
+  # Update target with your live Render deployment URL
+  - job_name: 'credit-risk-api-render'
+    metrics_path: '/metrics'
+    scheme: 'https'
+    static_configs:
+      - targets: ['credit-risk-assessment-system.onrender.com']
+        labels:
+          environment: 'production-render'

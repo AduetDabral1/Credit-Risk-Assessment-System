@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: 'Credit Risk Dashboards'
+    orgId: 1
+    folder: 'Credit Risk & MLOps'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/dashboards

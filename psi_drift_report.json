@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-09-21T21:34:41.601225",
+  "timestamp": "2026-09-22T08:29:47.670930",
   "baseline_records": 130324,
-  "production_records": 26065,
+  "production_records": 13,
   "thresholds": {
     "stable": "< 0.10",
     "moderate_shift": "0.10 - 0.25",
@@ -10,59 +10,59 @@
   "features": {
     "person_age": {
       "type": "numeric",
-      "psi": 0.0003,
-      "status": "STABLE"
+      "psi": 3.1765,
+      "status": "SEVERE_DRIFT"
     },
     "person_income": {
       "type": "numeric",
-      "psi": 0.0003,
-      "status": "STABLE"
+      "psi": 4.7652,
+      "status": "SEVERE_DRIFT"
     },
     "person_emp_length": {
       "type": "numeric",
-      "psi": 0.0003,
-      "status": "STABLE"
+      "psi": 4.1341,
+      "status": "SEVERE_DRIFT"
     },
     "loan_amnt": {
       "type": "numeric",
-      "psi": 0.0002,
-      "status": "STABLE"
+      "psi": 3.9133,
+      "status": "SEVERE_DRIFT"
     },
     "loan_int_rate": {
       "type": "numeric",
-      "psi": 0.0002,
-      "status": "STABLE"
+      "psi": 4.0298,
+      "status": "SEVERE_DRIFT"
     },
     "loan_percent_income": {
       "type": "numeric",
-      "psi": 0.0001,
-      "status": "STABLE"
+      "psi": 5.4717,
+      "status": "SEVERE_DRIFT"
     },
     "cb_person_cred_hist_length": {
       "type": "numeric",
-      "psi": 0.0003,
-      "status": "STABLE"
+      "psi": 3.8028,
+      "status": "SEVERE_DRIFT"
     },
     "person_home_ownership": {
       "type": "categorical",
-      "psi": 0.0001,
-      "status": "STABLE"
+      "psi": 0.5488,
+      "status": "SEVERE_DRIFT"
     },
     "loan_intent": {
       "type": "categorical",
-      "psi": 0.0003,
-      "status": "STABLE"
+      "psi": 4.4352,
+      "status": "SEVERE_DRIFT"
     },
     "loan_grade": {
       "type": "categorical",
-      "psi": 0.0001,
-      "status": "STABLE"
+      "psi": 2.9447,
+      "status": "SEVERE_DRIFT"
     },
     "cb_person_default_on_file": {
       "type": "categorical",
-      "psi": 0.0,
+      "psi": 0.0959,
       "status": "STABLE"
     }
   },
-  "overall_status": "STABLE"
+  "overall_status": "ATTENTION_REQUIRED"
 }

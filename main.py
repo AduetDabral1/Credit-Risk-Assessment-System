@@ -9,8 +9,44 @@ import os
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi import Response
+import time
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
 
 ml_model = {}
+
+# ==============================================================================
+# Prometheus Metrics Collectors
+# ==============================================================================
+PREDICTIONS_TOTAL = Counter(
+    'credit_predictions_total',
+    'Total count of credit risk predictions evaluated',
+    ['decision']
+)
+
+DEFAULT_PROBABILITY_HIST = Histogram(
+    'credit_default_probability',
+    'Distribution of calibrated default probabilities',
+    buckets=[0.02, 0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95, 1.0]
+)
+
+INFERENCE_LATENCY_SECONDS = Histogram(
+    'credit_inference_duration_seconds',
+    'Time spent computing credit risk prediction and adverse reasons',
+    buckets=[0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0]
+)
+
+PSI_FEATURE_GAUGE = Gauge(
+    'credit_feature_psi_score',
+    'Population Stability Index (PSI) drift score per feature',
+    ['feature']
+)
+
+FAIRNESS_DIR_GAUGE = Gauge(
+    'credit_four_fifths_dir',
+    'ECOA Four-Fifths Disparate Impact Ratio per demographic group',
+    ['cohort_type', 'group']
+)
 
 REASON_CODE_MAP = {
     'loan_percent_income': 'High debt-to-income / loan-to-income ratio',
@@ -110,6 +146,7 @@ class LoanApplication(BaseModel):
 
 @app.post('/predict')
 def predict(data: LoanApplication):
+    start_time = time.time()
     input_dict   = data.dict()
     input_df     = pd.DataFrame([input_dict])
     probability  = float(ml_model['model'].predict_proba(input_df)[:, 1][0])
@@ -123,6 +160,12 @@ def predict(data: LoanApplication):
 
     # Log incoming request asynchronously for PSI data drift monitoring
     log_inference_request(input_dict)
+
+    # Prometheus Metric Observations
+    decision_tag = "High_Risk" if is_high_risk else "Approved"
+    PREDICTIONS_TOTAL.labels(decision=decision_tag).inc()
+    DEFAULT_PROBABILITY_HIST.observe(probability)
+    INFERENCE_LATENCY_SECONDS.observe(time.time() - start_time)
 
     return {
         "default_probability"       : probability,
@@ -214,6 +257,27 @@ def get_fairness_metrics():
         return run_fairness_audit()
     except Exception as e:
         return {"error": f"Failed to load fairness audit: {str(e)}"}
+
+@app.get('/metrics')
+def prometheus_metrics():
+    """Exposes Prometheus exposition format metrics for scraping."""
+    try:
+        if os.path.exists("psi_drift_report.json"):
+            with open("psi_drift_report.json", "r") as f:
+                psi_data = json.load(f)
+                for feat, info in psi_data.get("features", {}).items():
+                    PSI_FEATURE_GAUGE.labels(feature=feat).set(float(info.get("psi", 0.0)))
+        if os.path.exists("fairness_audit_report.json"):
+            with open("fairness_audit_report.json", "r") as f:
+                fair_data = json.load(f)
+                for grp, info in fair_data.get("age_cohort_audit", {}).items():
+                    FAIRNESS_DIR_GAUGE.labels(cohort_type="age", group=grp).set(float(info.get("disparate_impact_ratio", 0.0)))
+                for grp, info in fair_data.get("housing_cohort_audit", {}).items():
+                    FAIRNESS_DIR_GAUGE.labels(cohort_type="housing", group=grp).set(float(info.get("disparate_impact_ratio", 0.0)))
+    except Exception as e:
+        print(f"[!] Warning updating prometheus gauges: {e}")
+
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 # Mount frontend static directory
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
